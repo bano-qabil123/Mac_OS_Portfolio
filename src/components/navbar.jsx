@@ -58,7 +58,17 @@ const Navbar = () => {
 
           <ul>
             {navLinks.map(({ id, name, type }) => (
-              <li key={id} onClick={() => openWindow(type)}>
+              <li
+                key={id}
+                role="button"
+                tabIndex={0}
+                onClick={() => openWindow(type)}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" && e.key !== " ") return;
+                  e.preventDefault();
+                  openWindow(type);
+                }}
+              >
                 <p>{name}</p>
               </li>
             ))}
@@ -71,7 +81,15 @@ const Navbar = () => {
               <li
                 key={id}
                 className="relative cursor-pointer"
+                role="button"
+                tabIndex={0}
+                aria-label={ICON_LABELS[id] || `icon-${id}`}
                 onClick={() => handleIconClick(id)}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" && e.key !== " ") return;
+                  e.preventDefault();
+                  handleIconClick(id);
+                }}
                 onMouseEnter={() => showTooltip(id)}
                 onMouseLeave={hideTooltip}
               >

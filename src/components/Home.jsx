@@ -18,7 +18,9 @@ const Home = () => {
   };
 
   useGSAP(() => {
-    Draggable.create(".folder");
+    const draggables = Draggable.create(".folder");
+    // Clean up on unmount (React Strict Mode double-invokes effects)
+    return () => draggables.forEach((d) => d.kill());
   }, []);
 
   return (
@@ -28,7 +30,15 @@ const Home = () => {
           <li
             key={project.id}
             className={clsx("group folder", project.windowPosition)}
+            role="button"
+            tabIndex={0}
+            aria-label={`Open ${project.name} project`}
             onDoubleClick={() => handleOpenProjectFinder(project)}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter" && e.key !== " ") return;
+              e.preventDefault();
+              handleOpenProjectFinder(project);
+            }}
           >
             <img src={`${import.meta.env.BASE_URL}images/folder.png`} alt={project.name} />
             <p>{project.name}</p>

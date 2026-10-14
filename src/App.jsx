@@ -27,7 +27,6 @@ export const App = () => {
 
   const handleDesktopClick = useCallback((e) => {
     // Only ripple on the raw desktop background (not windows / dock / navbar)
-    const tag = e.target.tagName;
     const isBackground =
       e.target === e.currentTarget ||
       e.target.id === "wallpaper" ||

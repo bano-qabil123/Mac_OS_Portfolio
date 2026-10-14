@@ -3,7 +3,6 @@ import { locations } from "#constants";
 import WindowWrapper from "#hoc/WindowWrapper";
 import useLocationStore from "#store/location";
 import useWindowStore from "#store/window";
-import useAdminStore from "#store/adminData";
 import clsx from "clsx";
 import { Search } from "lucide-react";
 import { useRef } from "react";
@@ -24,7 +23,14 @@ const Finder = () => {
         {items.map((item) => (
           <li
             key={item.id}
+            role="button"
+            tabIndex={0}
             onClick={() => setActiveLocation(item)}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter" && e.key !== " ") return;
+              e.preventDefault();
+              setActiveLocation(item);
+            }}
             className={clsx(
               item.id === activeLocation?.id ? "active" : "not-active",
             )}
@@ -86,6 +92,13 @@ const Finder = () => {
               key={item.id}
               className={clsx("finder-item", item.position)}
               data-item-id={item.id}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" && e.key !== " ") return;
+                e.preventDefault();
+                openItem(item);
+              }}
             >
               <img src={item.icon} alt={item.name} />
               <p>{item.name}</p>

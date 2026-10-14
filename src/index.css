@@ -2032,3 +2032,33 @@ body {
     -ms-overflow-style: none;
   }
 }
+
+
+/* ─── Accessibility: keyboard focus indicators ─── */
+nav li:focus-visible,
+#home li:focus-visible,
+.dock-icon:focus-visible,
+.spotlight-item:focus-visible,
+.sidebar li:focus-visible,
+.finder-item:focus-visible {
+  outline: 2px solid rgba(0, 122, 255, 0.85);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ─── Reduced motion: disable decorative animations ─── */
+@media (prefers-reduced-motion: reduce) {
+  .desktop-ripple,
+  .spotlight-backdrop,
+  .spotlight-panel,
+  .context-menu,
+  .wifi-popup,
+  .spotify-panel,
+  .control-center-panel,
+  .achievement-toast,
+  .navbar-tooltip,
+  .ma-app-card__preview {
+    animation: none !important;
+    transition: none !important;
+  }
+}
