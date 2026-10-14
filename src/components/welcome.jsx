@@ -19,12 +19,21 @@ const FONT_WEIGHTS = {
     title: { min: 400, max: 900, default: 400 },
 };
 
+const prefersReducedMotion = () =>
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+
 const setupTextHover = (Container, type) => {
     if (!Container) return () => {};
+
+    // The variable-weight hover effect is decorative motion — leave the text
+    // at its base weight for users who prefer reduced motion.
+    if (prefersReducedMotion()) return () => {};
 
     const letters = Container.querySelectorAll("span");
     const { min, max, default: base } = FONT_WEIGHTS[type];
     let containerLeft = 0;
+    let letterCenters = []; // cached, relative to the container's left edge
+    let currentWeights = new Array(letters.length).fill(base);
     let pendingX = 0;
     let rafId = null;
 
@@ -38,16 +47,26 @@ const setupTextHover = (Container, type) => {
 
     const measure = () => {
         containerLeft = Container.getBoundingClientRect().left;
+        letterCenters = Array.from(letters).map((letter) => {
+            const { left, width } = letter.getBoundingClientRect();
+            return left - containerLeft + width / 2;
+        });
     };
 
     const applyHover = () => {
         rafId = null;
 
-        letters.forEach((letter) => {
-            const { left: l, width: w } = letter.getBoundingClientRect();
-            const distance = Math.abs(pendingX - (l - containerLeft + w / 2));
+        letters.forEach((letter, i) => {
+            const distance = Math.abs(pendingX - letterCenters[i]);
             const intensity = Math.exp(-(distance ** 2) / 20000);
-            animateLetter(letter, min + (max - min) * intensity);
+            const target = min + (max - min) * intensity;
+
+            // Only tween letters whose weight actually changes — avoids
+            // creating dozens of identical tweens every pointer frame.
+            if (Math.abs(target - currentWeights[i]) > 0.5) {
+                currentWeights[i] = target;
+                animateLetter(letter, target);
+            }
         });
     };
 
@@ -63,6 +82,7 @@ const setupTextHover = (Container, type) => {
             cancelAnimationFrame(rafId);
             rafId = null;
         }
+        currentWeights.fill(base);
         letters.forEach((letter) => animateLetter(letter, base, 0.3));
     };
 
@@ -71,6 +91,8 @@ const setupTextHover = (Container, type) => {
     };
 
     measure();
+    // Variable fonts can shift letter positions once loaded — re-measure then.
+    document.fonts?.ready?.then(measure).catch(() => {});
     Container.addEventListener("mousemove", handleMouseMove, { passive: true });
     Container.addEventListener("mouseleave", handleMouseLeave);
     window.addEventListener("resize", handleResize, { passive: true });
@@ -103,7 +125,7 @@ export const Welcome = () => {
         <section id="welcome">
             <p ref={subtitleRef}>
                 {renderText(
-                    "Hey, I'm Umer-Jamshiad! Welcome to My",
+                    "Hey, I'm Umer-Jamshaid! Welcome to My",
                     "text-3xl font-georama",
                     100,
                 )}
