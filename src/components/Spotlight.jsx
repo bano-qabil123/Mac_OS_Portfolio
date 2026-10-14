@@ -2,10 +2,29 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, X } from "lucide-react";
 import useWindowStore from "#store/window";
 import useDesktopStore from "#store/desktop";
+import useLocationStore from "#store/location";
+import { locations } from "#constants";
 
 // Check if desktop is locked
 
 const base = import.meta.env.BASE_URL;
+
+// Short, accurate tech subtitles for the real projects in the Finder
+const PROJECT_SUBTITLES = {
+  "AI Resume Analyzer": "Next.js · Tailwind CSS",
+  "Food Delivery App": "React Native · Live tracking",
+  "P Attendance": "Flutter · Dart · GPS check-ins",
+  "Baby Shop Hub": "Flutter · Dart · E-commerce",
+};
+
+// Projects come straight from the Finder's real data — nothing invented here.
+const projectItems = (locations.work?.children ?? []).map((project) => ({
+  id: `project-${project.id}`,
+  label: project.name,
+  subtitle: PROJECT_SUBTITLES[project.name] ?? "Open in Finder",
+  icon: `${base}images/folder.png`,
+  location: project,
+}));
 
 const SPOTLIGHT_ITEMS = [
   {
@@ -21,17 +40,14 @@ const SPOTLIGHT_ITEMS = [
   },
   {
     group: "Projects",
-    items: [
-      { id: "proj1", label: "Nike Ecommerce Website", subtitle: "Next.js · Tailwind CSS", icon: `${base}images/folder.png`, windowKey: "finder" },
-      { id: "proj2", label: "AI Resume Analyzer",     subtitle: "React · AI / ML",        icon: `${base}images/folder.png`, windowKey: "finder" },
-      { id: "proj3", label: "Food Delivery App",      subtitle: "React Native · API",      icon: `${base}images/folder.png`, windowKey: "finder" },
-    ],
+    items: projectItems,
   },
 ];
 
 const Spotlight = () => {
   const { isSpotlightOpen, openSpotlight, closeSpotlight } = useDesktopStore();
   const { isLocked, openWindow } = useWindowStore();
+  const { setActiveLocation } = useLocationStore();
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
   const inputRef = useRef(null);
@@ -61,10 +77,16 @@ const Spotlight = () => {
 
   const handleSelect = useCallback(
     (item) => {
-      openWindow(item.windowKey);
+      if (item.location) {
+        // Deep-link: select the real project in the Finder store, then open it
+        setActiveLocation(item.location);
+        openWindow("finder");
+      } else {
+        openWindow(item.windowKey);
+      }
       handleClose();
     },
-    [openWindow, handleClose],
+    [openWindow, handleClose, setActiveLocation],
   );
 
   useEffect(() => {
