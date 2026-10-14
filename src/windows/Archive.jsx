@@ -88,7 +88,7 @@ const CATEGORY_META = {
   legacy: { color: "text-amber-500", bg: "bg-amber-50" },
 };
 
-const Archive = () => {
+const ArchiveContent = () => {
   const [filter, setFilter] = useState("all");
   const items =
     filter === "all"
@@ -237,5 +237,5 @@ const Archive = () => {
   );
 };
 
-const ArchiveWindow = WindowWrapper(Archive, "archive");
+const ArchiveWindow = WindowWrapper(ArchiveContent, "archive");
 export default ArchiveWindow;
