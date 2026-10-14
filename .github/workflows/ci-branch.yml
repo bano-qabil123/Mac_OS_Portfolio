@@ -1,4 +1,4 @@
-name: CI (lint & build) # run 1
+name: CI (lint & build)
 
 on:
   push:
@@ -21,8 +21,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Lint
-        run: npm run lint
+      - name: Lint (collect report)
+        run: npx eslint . --format json --output-file eslint-report.json || true
+
+      - name: Write lint report to job summary
+        if: always()
+        run: |
+          node -e 'const fs=require("fs");let r=[];try{r=JSON.parse(fs.readFileSync("eslint-report.json","utf8"))}catch(e){};let lines=["# ESLint report",""];let er=0,wr=0;for(const f of r){for(const m of f.messages){if(m.severity===2)er++;else wr++;lines.push("- `"+f.filePath.split("/workspace/").pop()+":"+m.line+"` "+(m.severity===2?"**error**":"warning")+" - "+m.message+" ("+m.ruleId+")")}}lines.push("","**Total: "+er+" errors, "+wr+" warnings**");fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join("\n"));'
 
       - name: Build
         run: npm run build
+
+      - name: Lint (strict)
+        run: npm run lint
