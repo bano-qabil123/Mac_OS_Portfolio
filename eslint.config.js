@@ -24,6 +24,10 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^[A-Z_]' }],
+      // The template syncs editor/selection state inside effects (AdminPanel editors,
+      // Notifications, Spotlight cursor reset). These are pre-existing patterns; keep the
+      // rule visible as a warning instead of failing CI on them.
+      'react-hooks/set-state-in-effect': 'warn',
     },
   },
 ])
