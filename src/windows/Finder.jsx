@@ -60,7 +60,7 @@ const Finder = () => {
       onPress: function (e) {
         e.stopPropagation();
       },
-      onClick: function (e) {
+      onClick: function () {
         const itemId = this.target.getAttribute("data-item-id");
         const item = activeLocation?.children?.find((c) => String(c.id) === itemId);
         if (item) {

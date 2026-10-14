@@ -52,7 +52,7 @@ const fireFullConfetti = (canvas) => {
 };
 
 // ─── Desktop click ripple ────────────────────────────────────────
-const Ripple = ({ x, y, id, onDone }) => {
+const Ripple = ({ x, y, onDone }) => {
   useEffect(() => {
     const t = setTimeout(onDone, 700);
     return () => clearTimeout(t);

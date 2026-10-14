@@ -15,7 +15,7 @@ const ICON_LABELS = {
 
 const Navbar = () => {
   const { openWindow } = useWindowStore();
-  const { toggleSpotlight, activeWallpaperId, setWallpaper, toggleControlCenter, isFocusModeEnabled } = useDesktopStore();
+  const { toggleSpotlight, activeWallpaperId, setWallpaper, toggleControlCenter } = useDesktopStore();
   const [time, setTime]       = useState(dayjs());
   const [wifiOpen, setWifiOpen] = useState(false);
   const [tooltip, setTooltip]  = useState(null); // { id, label }
