@@ -5,6 +5,9 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import useWindowStore from "#store/window";
 
+const prefersReducedMotion = () =>
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+
 export const Dock = () => {
   const { openWindow, restoreWindow, focusWindow, windows } = useWindowStore();
   const dockRef     = useRef(null);
@@ -70,6 +73,13 @@ export const Dock = () => {
   useGSAP(() => {
     const dock = dockRef.current;
     if (!dock) return;
+
+    // Distance-based magnification is a purely decorative effect — skip it
+    // entirely for users who prefer reduced motion.
+    if (prefersReducedMotion()) {
+      return () => {};
+    }
+
     const onMove  = (e) => updateMagnification(e.clientX);
     const onLeave = () => resetIcons();
     dock.addEventListener("mousemove", onMove, { passive: true });
@@ -83,7 +93,7 @@ export const Dock = () => {
 
   const bounceDockIcon = useCallback((index) => {
     const icon = iconsRef.current[index];
-    if (!icon) return;
+    if (!icon || prefersReducedMotion()) return;
     gsap.killTweensOf(icon);
     gsap.timeline()
       .to(icon, { y: -22, duration: 0.16, ease: "power2.out" })
@@ -124,6 +134,7 @@ export const Dock = () => {
               data-tooltip-content={name}
               data-tooltip-delay-show={150}
               disabled={!canOpen}
+              data-window={id}
               onClick={() => handleClick({ id, canOpen }, index)}
             >
               <img
