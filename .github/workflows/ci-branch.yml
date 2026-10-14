@@ -27,10 +27,17 @@ jobs:
       - name: Write lint report to job summary
         if: always()
         run: |
-          node -e 'const fs=require("fs");let r=[];try{r=JSON.parse(fs.readFileSync("eslint-report.json","utf8"))}catch(e){};let lines=["# ESLint report",""];let er=0,wr=0;for(const f of r){for(const m of f.messages){if(m.severity===2)er++;else wr++;lines.push("- `"+f.filePath.split("/workspace/").pop()+":"+m.line+"` "+(m.severity===2?"**error**":"warning")+" - "+m.message+" ("+m.ruleId+")")}}lines.push("","**Total: "+er+" errors, "+wr+" warnings**");fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join("\n"));'
+          node -e 'const fs=require("fs");let r=[];try{r=JSON.parse(fs.readFileSync("eslint-report.json","utf8"))}catch(e){};let lines=["# ESLint report",""];let er=0,wr=0;let errs=[];for(const f of r){for(const m of f.messages){if(m.severity===2){er++;errs.push(f.filePath+":"+m.line+" "+m.message+" ("+m.ruleId+")")}else{wr++}lines.push("- `"+f.filePath+":"+m.line+"` "+(m.severity===2?"**error**":"warning")+" - "+m.message+" ("+m.ruleId+")")}}lines.push("","**Total: "+er+" errors, "+wr+" warnings**");fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join("\n"));console.log("::warning title=lintReport::eslint JSON report total: "+er+" errors, "+wr+" warnings");errs.slice(0,5).forEach((e,i)=>console.log("::warning title=lintErr"+i+"::"+e.replace(/%/g,"%25").slice(0,220)))'
 
       - name: Build
         run: npm run build
 
       - name: Lint (strict)
-        run: npm run lint
+        run: |
+          set +e
+          npm run lint > lint-strict.log 2>&1
+          code=$?
+          echo "strict lint exit code: $code"
+          tail -50 lint-strict.log
+          grep -Ei 'error|oops|problem|exit code' lint-strict.log | head -5 | awk '{ printf "::warning title=strict%d::", NR; s=$0; gsub(/%/, "%25", s); print substr(s, 1, 220) }'
+          exit $code
