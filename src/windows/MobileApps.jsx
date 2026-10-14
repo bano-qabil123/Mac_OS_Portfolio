@@ -80,4 +80,6 @@ const MobileApps = () => {
   );
 };
 
-export default WindowWrapper(MobileApps, "mobileapps");
+const MobileAppsWindow = WindowWrapper(MobileApps, "mobileapps");
+
+export default MobileAppsWindow;
